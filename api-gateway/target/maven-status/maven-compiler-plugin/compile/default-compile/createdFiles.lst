@@ -1,0 +1,5 @@
+com\donaton\gateway\config\RestClientConfig.class
+com\donaton\gateway\ApiGatewayApplication.class
+com\donaton\gateway\service\ProxyService.class
+com\donaton\gateway\controller\GatewayController.class
+com\donaton\gateway\config\CorsConfig.class
