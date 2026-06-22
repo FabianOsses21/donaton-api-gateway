@@ -77,19 +77,23 @@ public class ProxyService {
     }
 
     private HttpHeaders cleanResponseHeaders(HttpHeaders originalHeaders) {
-        HttpHeaders headers = new HttpHeaders();
+    HttpHeaders headers = new HttpHeaders();
 
-        if (originalHeaders == null) {
-            return headers;
-        }
-
-        originalHeaders.forEach((key, values) -> {
-            if (!key.equalsIgnoreCase("transfer-encoding") &&
-                    !key.equalsIgnoreCase("connection")) {
-                headers.put(key, values);
-            }
-        });
-
+    if (originalHeaders == null) {
         return headers;
     }
+
+    originalHeaders.forEach((key, values) -> {
+        if (!key.equalsIgnoreCase("transfer-encoding") &&
+                !key.equalsIgnoreCase("connection") &&
+                !key.equalsIgnoreCase("access-control-allow-origin") &&
+                !key.equalsIgnoreCase("access-control-allow-methods") &&
+                !key.equalsIgnoreCase("access-control-allow-headers") &&
+                !key.equalsIgnoreCase("access-control-allow-credentials")) {
+            headers.put(key, values);
+        }
+    });
+
+    return headers;
+}
 }
