@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProxyService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.donaton.gateway.service</a> &gt; <span class="el_source">ProxyService.java</span></div><h1>ProxyService.java</h1><pre class="source lang-java linenums">package com.donaton.gateway.service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
+
+import java.util.Enumeration;
+
+@Service
+@RequiredArgsConstructor
+public class ProxyService {
+
+    private final RestClient restClient;
+
+    public ResponseEntity&lt;String&gt; forward(
+            HttpMethod method,
+            String targetUrl,
+            String body,
+            HttpServletRequest request) {
+
+<span class="nc" id="L24">        HttpHeaders headers = copyHeaders(request);</span>
+
+        try {
+<span class="nc" id="L27">            ResponseEntity&lt;String&gt; response = restClient</span>
+<span class="nc" id="L28">                    .method(method)</span>
+<span class="nc" id="L29">                    .uri(targetUrl)</span>
+<span class="nc" id="L30">                    .headers(httpHeaders -&gt; httpHeaders.addAll(headers))</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">                    .body(body == null ? &quot;&quot; : body)</span>
+<span class="nc" id="L32">                    .retrieve()</span>
+<span class="nc" id="L33">                    .toEntity(String.class);</span>
+
+<span class="nc" id="L35">            return ResponseEntity</span>
+<span class="nc" id="L36">                    .status(response.getStatusCode())</span>
+<span class="nc" id="L37">                    .headers(cleanResponseHeaders(response.getHeaders()))</span>
+<span class="nc" id="L38">                    .body(response.getBody());</span>
+
+<span class="nc" id="L40">        } catch (HttpStatusCodeException exception) {</span>
+<span class="nc" id="L41">            return ResponseEntity</span>
+<span class="nc" id="L42">                    .status(exception.getStatusCode())</span>
+<span class="nc" id="L43">                    .headers(cleanResponseHeaders(exception.getResponseHeaders()))</span>
+<span class="nc" id="L44">                    .body(exception.getResponseBodyAsString());</span>
+
+<span class="nc" id="L46">        } catch (Exception exception) {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            String detalle = exception.getMessage() == null</span>
+<span class="nc" id="L48">                    ? &quot;Error desconocido&quot;</span>
+<span class="nc" id="L49">                    : exception.getMessage().replace(&quot;\&quot;&quot;, &quot;'&quot;);</span>
+
+<span class="nc" id="L51">            return ResponseEntity</span>
+<span class="nc" id="L52">                    .status(HttpStatus.SERVICE_UNAVAILABLE)</span>
+<span class="nc" id="L53">                    .body(&quot;{\&quot;error\&quot;:\&quot;No se pudo conectar con el microservicio destino\&quot;,\&quot;detalle\&quot;:\&quot;&quot;</span>
+                            + detalle + &quot;\&quot;}&quot;);
+        }
+    }
+
+    private HttpHeaders copyHeaders(HttpServletRequest request) {
+<span class="nc" id="L59">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L60">        Enumeration&lt;String&gt; headerNames = request.getHeaderNames();</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        while (headerNames.hasMoreElements()) {</span>
+<span class="nc" id="L63">            String headerName = headerNames.nextElement();</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">            if (headerName.equalsIgnoreCase(&quot;host&quot;) ||</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                    headerName.equalsIgnoreCase(&quot;content-length&quot;)) {</span>
+<span class="nc" id="L67">                continue;</span>
+            }
+
+<span class="nc" id="L70">            Enumeration&lt;String&gt; values = request.getHeaders(headerName);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">            while (values.hasMoreElements()) {</span>
+<span class="nc" id="L72">                headers.add(headerName, values.nextElement());</span>
+            }
+<span class="nc" id="L74">        }</span>
+
+<span class="nc" id="L76">        return headers;</span>
+    }
+
+    private HttpHeaders cleanResponseHeaders(HttpHeaders originalHeaders) {
+<span class="nc" id="L80">    HttpHeaders headers = new HttpHeaders();</span>
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">    if (originalHeaders == null) {</span>
+<span class="nc" id="L83">        return headers;</span>
+    }
+
+<span class="nc" id="L86">    originalHeaders.forEach((key, values) -&gt; {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (!key.equalsIgnoreCase(&quot;transfer-encoding&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                !key.equalsIgnoreCase(&quot;connection&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                !key.equalsIgnoreCase(&quot;access-control-allow-origin&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                !key.equalsIgnoreCase(&quot;access-control-allow-methods&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                !key.equalsIgnoreCase(&quot;access-control-allow-headers&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                !key.equalsIgnoreCase(&quot;access-control-allow-credentials&quot;)) {</span>
+<span class="nc" id="L93">            headers.put(key, values);</span>
+        }
+<span class="nc" id="L95">    });</span>
+
+<span class="nc" id="L97">    return headers;</span>
+}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
