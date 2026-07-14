@@ -1,7 +1,6 @@
 package com.donaton.gateway.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -10,10 +9,13 @@ import org.springframework.web.client.RestClient;
 import java.util.Enumeration;
 
 @Service
-@RequiredArgsConstructor
 public class ProxyService {
 
     private final RestClient restClient;
+
+    public ProxyService(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder.build();
+    }
 
     public ResponseEntity<String> forward(
             HttpMethod method,
