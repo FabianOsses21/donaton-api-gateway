@@ -1,0 +1,3 @@
+com\donaton\gateway\ApiGatewayApplicationTests.class
+com\donaton\gateway\config\RestClientConfigTest.class
+com\donaton\gateway\config\CorsConfigTest.class
